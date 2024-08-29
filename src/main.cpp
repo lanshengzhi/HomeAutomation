@@ -3,7 +3,7 @@
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("S");  // 初始化串口并打印"Hello World"
+    Serial.println("Serial initialized");  // Initialize serial and print "Hello World"
 }
 
 void loop() {
