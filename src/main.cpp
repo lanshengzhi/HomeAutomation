@@ -14,9 +14,11 @@ PushButton downButton(25);
 PushButton nextButton(26);
 
 DHTesp dht;
-TimerHandle_t dhtTimer;
-
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+TimerHandle_t dhtTimer;
+TimerHandle_t blinkTimer;
+TimerHandle_t buttonTimer;
 
 void dhtTimerCallback(TimerHandle_t xTimer) {
     static float lastTemp = 0;
@@ -42,24 +44,17 @@ void dhtTimerCallback(TimerHandle_t xTimer) {
     }
 }
 
-void blinkTask(void *pvParameters) {
-    pinMode(LED_INDICATOR, OUTPUT);
-    while (1) {
-        digitalWrite(LED_INDICATOR, HIGH);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        digitalWrite(LED_INDICATOR, LOW);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+void blinkTimerCallback(TimerHandle_t xTimer) {
+    static bool ledState = false;
+    ledState = !ledState;
+    digitalWrite(LED_INDICATOR, ledState);
 }
 
-void buttonTask(void *pvParameters) {
-    while (1) {
-        prevButton.Run();
-        upButton.Run();
-        downButton.Run();
-        nextButton.Run();
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
+void buttonTimerCallback(TimerHandle_t xTimer) {
+    prevButton.Run();
+    upButton.Run();
+    downButton.Run();
+    nextButton.Run();
 }
 
 void setup() {
@@ -103,25 +98,7 @@ void setup() {
         Serial.println("Next button released");
     });
 
-    xTaskCreate(
-        blinkTask,   // Task function
-        "LED Task",  // Task name
-        1024,        // Stack size
-        NULL,        // Task parameters
-        1,           // Task priority
-        NULL         // Task handle
-    );
-
-    xTaskCreate(
-        buttonTask,    // Task function
-        "Button Task", // Task name
-        1024,          // Stack size
-        NULL,          // Task parameters
-        1,             // Task priority
-        NULL           // Task handle
-    );
-
-    // Create a timer that triggers every 5 seconds
+    // Create DHT timer (5 seconds interval)
     dhtTimer = xTimerCreate(
         "DHT Timer",
         pdMS_TO_TICKS(5000),
@@ -130,11 +107,37 @@ void setup() {
         dhtTimerCallback
     );
 
+    // Create blink timer (1 second interval)
+    blinkTimer = xTimerCreate(
+        "Blink Timer",
+        pdMS_TO_TICKS(1000),
+        pdTRUE,
+        (void*)0,
+        blinkTimerCallback
+    );
+
+    // Create button timer (10 milliseconds interval)
+    buttonTimer = xTimerCreate(
+        "Button Timer",
+        pdMS_TO_TICKS(10),
+        pdTRUE,
+        (void*)0,
+        buttonTimerCallback
+    );
+
+    // Start all timers
     if (dhtTimer != NULL) {
         xTimerStart(dhtTimer, 0);
+    }
+    if (blinkTimer != NULL) {
+        xTimerStart(blinkTimer, 0);
+    }
+    if (buttonTimer != NULL) {
+        xTimerStart(buttonTimer, 0);
     }
 }
 
 void loop() {
-    // Main loop is empty, all work is done in FreeRTOS tasks
+    // add delay
+    vTaskDelay(pdMS_TO_TICKS(5000));
 }
