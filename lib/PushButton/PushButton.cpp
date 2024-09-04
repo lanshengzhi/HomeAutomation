@@ -6,10 +6,6 @@ enum DebounceState {
     DEBOUNCING = 1
 };
 
-void PushButton::Begin() {
-    pinMode(m_pin, INPUT_PULLUP);
-}
-
 void PushButton::SetPressedCallback(std::function<void()> callback) {
     m_pressedCallback = callback;
 }

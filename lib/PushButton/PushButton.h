@@ -5,8 +5,7 @@
 
 class PushButton {
 public:
-    PushButton(uint8_t pin) : m_pin(pin) {}
-    void Begin();
+    PushButton(uint8_t pin) : m_pin(pin) { pinMode(m_pin, INPUT_PULLUP); }
     uint8_t GetPin() const { return m_pin; }
     void SetPressedCallback(std::function<void()> callback);
     void SetReleasedCallback(std::function<void()> callback);

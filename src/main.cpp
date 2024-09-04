@@ -20,9 +20,50 @@ void blinkTask(void *pvParameters) {
     }
 }
 
+void buttonTask(void *pvParameters) {
+    while (1) {
+        prevButton.Run();
+        upButton.Run();
+        downButton.Run();
+        nextButton.Run();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
 void setup() {
     Serial.begin(115200);
     Serial.println("FreeRTOS LED blinking task initialization");
+
+    prevButton.SetPressedCallback([]() {
+        Serial.println("Previous button pressed");
+    });
+
+    prevButton.SetReleasedCallback([]() {
+        Serial.println("Previous button released");
+    });
+
+    upButton.SetPressedCallback([]() {
+        Serial.println("Up button pressed");
+    });
+
+    upButton.SetReleasedCallback([]() {
+        Serial.println("Up button released");
+    });
+    
+    downButton.SetPressedCallback([]() {
+        Serial.println("Down button pressed");
+    });
+
+    downButton.SetReleasedCallback([]() {
+        Serial.println("Down button released");
+    });
+
+    nextButton.SetPressedCallback([]() {
+        Serial.println("Next button pressed");
+    });
+
+    nextButton.SetReleasedCallback([]() {
+        Serial.println("Next button released");
+    });
 
     xTaskCreate(
         blinkTask,   // Task function
@@ -31,6 +72,15 @@ void setup() {
         NULL,        // Task parameters
         1,           // Task priority
         NULL         // Task handle
+    );
+
+    xTaskCreate(
+        buttonTask,    // Task function
+        "Button Task", // Task name
+        1024,          // Stack size
+        NULL,          // Task parameters
+        1,             // Task priority
+        NULL           // Task handle
     );
 }
 
