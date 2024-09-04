@@ -20,8 +20,8 @@
 - Create a new instance
 - Choose `Debian 12`
 - Choose `CPU 2 vCPU`
-- Choose `RAM 1GB`
-- Choose `Storage 40GB`
+- Choose `RAM 2GB`
+- Choose `Storage 60GB`
 - Instance Network
   - IPv4 Firewall: `All protocols: ALL`
 
@@ -79,6 +79,8 @@ sudo apt install ./homeassistant-supervised.deb
 
 Reference: <https://community.home-assistant.io/t/debian-12-ha-supervisor-installation/640446/19>
 
+> I think I¡¯ve found a solution. The problem is indeed with the cloud images of Debian. They come with netplan and systemd-networkd. This prevents Network Manager from taking over the interface. So the solution is:
+
 ```bash
 sudo apt remove netplan.io
 sudo systemctl disable systemd-networkd
@@ -88,3 +90,7 @@ sudo reboot
 ### Step 6: Access Home Assistant
 
 - Open a browser and navigate to `http://<lightsail-public-ip>:8123`
+
+## Add HACS to Home Assistant
+
+Reference: <https://hacs.xyz/docs/use/>
