@@ -4,6 +4,7 @@
 #include <freertos/task.h>
 #include <freertos/timers.h>
 #include <DHTesp.h>
+#include <LiquidCrystal_I2C.h>
 
 #define LED_INDICATOR 15  //  LED indicator is connected to GPIO 15
 
@@ -15,12 +16,29 @@ PushButton nextButton(26);
 DHTesp dht;
 TimerHandle_t dhtTimer;
 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 void dhtTimerCallback(TimerHandle_t xTimer) {
+    static float lastTemp = 0;
+    static float lastHumidity = 0;
+    
     TempAndHumidity values = dht.getTempAndHumidity();
     if (dht.getStatus() == DHTesp::ERROR_NONE) {
-        Serial.printf("Temperature: %.2f, Humidity: %.2f%%\n", values.temperature, values.humidity);
+        if (values.temperature != lastTemp) {
+            lcd.setCursor(0, 0);
+            lcd.printf("Temp: %.1fC    ", values.temperature);
+            lastTemp = values.temperature;
+        }
+        if (values.humidity != lastHumidity) {
+            lcd.setCursor(0, 1);
+            lcd.printf("Humidity: %.1f%%", values.humidity);
+            lastHumidity = values.humidity;
+        }
     } else {
-        Serial.println("Failed to read DHT sensor!");
+        lcd.setCursor(0, 0);
+        lcd.print("DHT Read Error!");
+        lcd.setCursor(0, 1);
+        lcd.print("                ");
     }
 }
 
@@ -49,6 +67,9 @@ void setup() {
     Serial.println("FreeRTOS LED blinking task initialization");
 
     dht.setup(27, DHTesp::DHT11);
+
+    lcd.init();
+    lcd.backlight();
 
     prevButton.SetPressedCallback([]() {
         Serial.println("Previous button pressed");
@@ -100,7 +121,7 @@ void setup() {
         NULL           // Task handle
     );
 
-    // 创建定时器，每 2 秒触发一次
+    // Create a timer that triggers every 5 seconds
     dhtTimer = xTimerCreate(
         "DHT Timer",
         pdMS_TO_TICKS(5000),
