@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/timers.h>
+#include <DHTesp.h>
 
 #define LED_INDICATOR 15  //  LED indicator is connected to GPIO 15
 
@@ -9,6 +11,18 @@ PushButton prevButton(32);
 PushButton upButton(33);
 PushButton downButton(25);
 PushButton nextButton(26);
+
+DHTesp dht;
+TimerHandle_t dhtTimer;
+
+void dhtTimerCallback(TimerHandle_t xTimer) {
+    TempAndHumidity values = dht.getTempAndHumidity();
+    if (dht.getStatus() == DHTesp::ERROR_NONE) {
+        Serial.printf("Temperature: %.2f, Humidity: %.2f%%\n", values.temperature, values.humidity);
+    } else {
+        Serial.println("Failed to read DHT sensor!");
+    }
+}
 
 void blinkTask(void *pvParameters) {
     pinMode(LED_INDICATOR, OUTPUT);
@@ -29,9 +43,12 @@ void buttonTask(void *pvParameters) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+
 void setup() {
     Serial.begin(115200);
     Serial.println("FreeRTOS LED blinking task initialization");
+
+    dht.setup(27, DHTesp::DHT11);
 
     prevButton.SetPressedCallback([]() {
         Serial.println("Previous button pressed");
@@ -82,6 +99,19 @@ void setup() {
         1,             // Task priority
         NULL           // Task handle
     );
+
+    // 创建定时器，每 2 秒触发一次
+    dhtTimer = xTimerCreate(
+        "DHT Timer",
+        pdMS_TO_TICKS(5000),
+        pdTRUE,
+        (void*)0,
+        dhtTimerCallback
+    );
+
+    if (dhtTimer != NULL) {
+        xTimerStart(dhtTimer, 0);
+    }
 }
 
 void loop() {
