@@ -1,7 +1,7 @@
 #ifndef PUSH_BUTTON_h
 #define PUSH_BUTTON_h
-#include <Arduino.h>
 #include <functional>
+#include <Arduino.h>
 
 class PushButton {
 public:

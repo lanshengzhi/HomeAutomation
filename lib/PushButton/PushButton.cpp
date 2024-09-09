@@ -1,5 +1,4 @@
 #include "PushButton.h"
-#include <functional>
 
 enum DebounceState {
     IDLE = 0,
