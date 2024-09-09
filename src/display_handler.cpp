@@ -12,6 +12,10 @@ void setupDisplay() {
 }
 
 void loopDisplay() {
+    if (!isDeviceInfoChanged()) {
+        return;
+    }
+
     DeviceInfo *deviceInfo = GetDeviceInfo();
     String tempStr, humStr;
 

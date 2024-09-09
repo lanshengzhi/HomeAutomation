@@ -7,24 +7,12 @@
 static DHTesp dht;
 static float lastTemp = 0;
 static float lastHumidity = 0;
-static unsigned long lastSensorCheckTime = 0;
-static unsigned long sensorCheckInterval = 5000;
 
-void setupSensors() {
+void setupSensor() {
     dht.setup(DHT_PIN, DHTesp::DHT11);
-    lastSensorCheckTime = millis();
 }
 
-void loopSensors() {
-    
-    unsigned long currentTime = millis();
-    
-    if (currentTime - lastSensorCheckTime < sensorCheckInterval) {
-        return;
-    }
-
-    lastSensorCheckTime = currentTime;
-
+void loopSensor() {
     TempAndHumidity values = dht.getTempAndHumidity();
     if (dht.getStatus() != DHTesp::ERROR_NONE) {
         Serial.println("DHT Read Error!");

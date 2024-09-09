@@ -9,9 +9,6 @@ static PushButton upButton(BUTTON_UP_PIN);
 static PushButton downButton(BUTTON_DOWN_PIN);
 static PushButton nextButton(BUTTON_NEXT_PIN);
 
-static unsigned long lastButtonCheckTime = 0;
-const unsigned long buttonCheckInterval = 20; // 20ms
-
 void setupButtons() {
     prevButton.SetPressedCallback([]() {
         SetDeviceInfo()->buttonState.bits.prev = 1;
@@ -60,21 +57,11 @@ void setupButtons() {
         Serial.println("Next button released");
         Serial.println(GetDeviceInfo()->buttonState.all);
     });
-
-    lastButtonCheckTime = millis(); // Initialize lastButtonCheckTime
 }
 
 void loopButtons() {
-    unsigned long currentTime = millis();
-    
-    if (currentTime - lastButtonCheckTime < buttonCheckInterval) {
-        return;
-    }
-
     prevButton.Run();
     upButton.Run();
     downButton.Run();
     nextButton.Run();
-    
-    lastButtonCheckTime = currentTime;
 }

@@ -1,3 +1,4 @@
+#include "task_scheduler.h"
 #include "config.h"
 #include "dashboard_handler.h"
 #include "wifi_handler.h"
@@ -5,51 +6,30 @@
 #include "sensor_handler.h"
 #include "display_handler.h"
 #include "button_handler.h"
+#include "Indicator_handler.h"
 #include <Arduino.h>
 
-unsigned long lastIndicatorCheckTime = 0;
-unsigned long indicatorCheckInterval = 1000;
-
-void setupIndicator() {
-    pinMode(LED_INDICATOR, OUTPUT);
-}
-
-void loopIndicator() {
-    static bool ledState = false;
-    unsigned long currentTime = millis();
-    
-    if (currentTime - lastIndicatorCheckTime < indicatorCheckInterval) {
-        return;
-    }
-
-    ledState = !ledState;
-    digitalWrite(LED_INDICATOR, ledState);
-    lastIndicatorCheckTime = currentTime;
-}
-
+TaskScheduler scheduler;
 
 void setup() {
     Serial.begin(115200);
 
-    setupIndicator();
     setupDashboard();
+    setupIndicator();
     setupWiFi();
     setupMQTT();
+    setupSensor();
     setupDisplay();
     setupButtons();
-    setupSensors();
+
+    scheduler.addTask(loopIndicator, 1000);  // Every 1 second
+    scheduler.addTask(loopButtons, 20);      // Every 20ms
+    scheduler.addTask(loopSensor, 5000);    // Every 5 seconds
+    scheduler.addTask(loopMQTT, 5000);        // Every 5 seconds
+    scheduler.addTask(loopDisplay, 200);    // Every 200ms
+    scheduler.addTask(loopDashboard, 1000);  // Every 1 second
 }
 
 void loop() {
-    loopIndicator();
-    loopButtons();
-    loopSensors();
-    loopMQTT();
-
-    if (isDeviceInfoChanged()) {
-        
-        loopDisplay();
-    }
-
-    loopDashboard(); // This should be called last to ensure the latest data is sent to the dashboard
+    scheduler.run();
 }
