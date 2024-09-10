@@ -55,5 +55,13 @@ void setupWiFi() {
     WiFi.onEvent(onWiFiEventHandler);
 
     WiFiManager wifiManager;
-    wifiManager.autoConnect("AutoConnectAP");
+    bool res = wifiManager.autoConnect("AutoConnectAP");
+
+    if(!res) {
+        Serial.println("Failed to connect");
+    } 
+    else {
+        //if you get here you have connected to the WiFi    
+        Serial.println("connected...yeey :)");
+    }
 }

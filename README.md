@@ -94,3 +94,13 @@ sudo reboot
 ## Add HACS to Home Assistant
 
 Reference: <https://hacs.xyz/docs/use/>
+
+### Step 7: Install EMQX
+
+Reference: <https://docs.emqx.com/en/emqx/latest/deploy/install.html>
+
+Home Assistant setting
+
+- Settings -> Add-ons -> Add-on store -> Search EMQX -> Install
+- Enter the EMQX server address, port, username, and password
+- Turn on `Start on boot` and `Show in sidebar`

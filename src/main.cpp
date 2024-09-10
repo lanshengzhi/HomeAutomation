@@ -25,9 +25,9 @@ void setup() {
     scheduler.addTask(loopIndicator, 1000);  // Every 1 second
     scheduler.addTask(loopButtons, 20);      // Every 20ms
     scheduler.addTask(loopSensor, 5000);    // Every 5 seconds
-    scheduler.addTask(loopMQTT, 5000);        // Every 5 seconds
-    scheduler.addTask(loopDisplay, 200);    // Every 200ms
-    scheduler.addTask(loopDashboard, 1000);  // Every 1 second
+    scheduler.addTask(loopMQTT, 10);        // Every 10 ms
+    scheduler.addTask(loopDisplay, 10);    // Every 10 ms
+    scheduler.addTask(loopDashboard, 10);  // Every 10 ms
 }
 
 void loop() {

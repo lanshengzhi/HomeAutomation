@@ -16,10 +16,10 @@ void onMqttConnectionChange(bool connected) {
     Serial.println(connected ? "MQTT Connected" : "MQTT Disconnected");
 }
 
-bool connectMQTT() {
-    bool connected = mqttClient.connect(MQTT_CLIENT_ID);
+bool reconnectMQTT() {
+    bool connected = mqttClient.connect(MQTT_CLIENT_ID, MQTT_BROKER_USERNAME, MQTT_BROKER_PASSWORD);
     if (connected != lastMqttConnectionState) {
-        onMqttConnectionChange(connected);
+        onMqttConnectionChange(connected);  // Update the connection state so the dashboard knows
         lastMqttConnectionState = connected;
     }
     if (connected) {
@@ -38,29 +38,44 @@ void onMQTTCallback(char* topic, byte* payload, unsigned int length) {
     Serial.println();
 }
 
+void publishDeviceInfo() {
+    DeviceInfo* deviceInfo = GetDeviceInfo();
+    char tempStr[10], humidityStr[10];
+    snprintf(tempStr, sizeof(tempStr), "%.2f", deviceInfo->temperature);
+    snprintf(humidityStr, sizeof(humidityStr), "%.2f", deviceInfo->humidity);
+    mqttClient.publish(TOPIC_TEMP, tempStr);
+    mqttClient.publish(TOPIC_HUMIDITY, humidityStr);
+    Serial.println("MQTT Publish");
+}
+
 void setupMQTT() {
     mqttClient.setServer(MQTT_BROKER_IP, MQTT_BROKER_PORT);
     mqttClient.setCallback(onMQTTCallback);
     mqttClient.setKeepAlive(MQTT_KEEP_ALIVE);
-    connectMQTT();
 }
 
 void loopMQTT() {
-    bool isConnected = mqttClient.connected();
-    if (isConnected != lastMqttConnectionState) {
-        onMqttConnectionChange(isConnected);
-        lastMqttConnectionState = isConnected;
+    bool currentConnectionState = mqttClient.connected();
+    
+    if (currentConnectionState != lastMqttConnectionState) {
+        onMqttConnectionChange(currentConnectionState);  // Update the connection state so the dashboard knows
+        lastMqttConnectionState = currentConnectionState;
     }
 
-    if (!isConnected) {
+    if (!currentConnectionState) {  // If MQTT is disconnected
         unsigned long currentTime = millis();
         if (currentTime - lastReconnectAttempt > 5000) {
             lastReconnectAttempt = currentTime;
-            if (connectMQTT()) {    // Reconnect to MQTT broker
+            if (reconnectMQTT()) {  // Try to reconnect
                 lastReconnectAttempt = 0;
             }
         }
-    } else {
-        mqttClient.loop();
+        return;  // Exit the function early
+    }
+
+    mqttClient.loop();
+
+    if (isDeviceInfoChanged()) {  // If device info has changed
+        publishDeviceInfo();
     }
 }
