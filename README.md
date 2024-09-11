@@ -87,20 +87,26 @@ sudo systemctl disable systemd-networkd
 sudo reboot
 ```
 
-### Step 6: Access Home Assistant
-
-- Open a browser and navigate to `http://<lightsail-public-ip>:8123`
-
-## Add HACS to Home Assistant
-
-Reference: <https://hacs.xyz/docs/use/>
-
-### Step 7: Install EMQX
+### Step 6: Install EMQX(MQTT Broker)
 
 Reference: <https://docs.emqx.com/en/emqx/latest/deploy/install.html>
 
-Home Assistant setting
+#### Home Assistant setting
 
 - Settings -> Add-ons -> Add-on store -> Search EMQX -> Install
 - Enter the EMQX server address, port, username, and password
 - Turn on `Start on boot` and `Show in sidebar`
+
+### Step 7: Access Home Assistant
+
+- Open a browser and navigate to `http://<lightsail-public-ip>:8123`
+
+#### Add HACS to Home Assistant
+
+Reference: <https://hacs.xyz/docs/use/>
+
+#### Add integration
+
+- Settings -> Devices & Services -> Add Integration
+- Search for `MQTT`
+- Enter the MQTT server address, port, username, and password

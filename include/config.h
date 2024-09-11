@@ -11,6 +11,9 @@
 #define TOPIC_TEMP      "HA-ESP32-01/temp/state"
 #define TOPIC_HUMIDITY  "HA-ESP32-01/humidity/state"
 #define TOPIC_SUBSCRIBE "ESP32/command"
+#define TOPIC_AVAILABILITY "HA-ESP32-01/availability"
+#define TOPIC_CONFIG       "homeassistant/sensor/HA-ESP32-01/config"
+#define MQTT_BUFFER_SIZE 1024
 
 // Pin definitions
 #define LED_INDICATOR           15
